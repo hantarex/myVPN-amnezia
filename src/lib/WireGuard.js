@@ -127,15 +127,6 @@ PreUp = ${WG_PRE_UP}
 PostUp = ${WG_POST_UP}
 PreDown = ${WG_PRE_DOWN}
 PostDown = ${WG_POST_DOWN}
-Jc = ${config.server.jc}
-Jmin = ${config.server.jmin}
-Jmax = ${config.server.jmax}
-S1 = ${config.server.s1}
-S2 = ${config.server.s2}
-H1 = ${config.server.h1}
-H2 = ${config.server.h2}
-H3 = ${config.server.h3}
-H4 = ${config.server.h4}
 `;
 
     for (const [clientId, client] of Object.entries(config.clients)) {
@@ -245,15 +236,6 @@ PrivateKey = ${client.privateKey ? `${client.privateKey}` : 'REPLACE_ME'}
 Address = ${client.address}/24
 ${WG_DEFAULT_DNS ? `DNS = ${WG_DEFAULT_DNS}\n` : ''}\
 ${WG_MTU ? `MTU = ${WG_MTU}\n` : ''}\
-Jc = ${config.server.jc}
-Jmin = ${config.server.jmin}
-Jmax = ${config.server.jmax}
-S1 = ${config.server.s1}
-S2 = ${config.server.s2}
-H1 = ${config.server.h1}
-H2 = ${config.server.h2}
-H3 = ${config.server.h3}
-H4 = ${config.server.h4}
 
 [Peer]
 PublicKey = ${config.server.publicKey}
