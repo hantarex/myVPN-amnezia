@@ -1,0 +1,27 @@
+# Чувствительные данные
+.env
+
+# Данные WireGuard
+data/
+*.conf
+*.key
+*.pub
+
+# Логи
+*.log
+logs/
+
+# Временные файлы
+*.tmp
+*.swp
+*.swo
+*~
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS файлы
+.DS_Store
+Thumbs.db
