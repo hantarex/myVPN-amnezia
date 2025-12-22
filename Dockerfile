@@ -75,12 +75,18 @@ RUN apk add --no-cache \
 # Копирование AmneziaWG tools из builder stage
 COPY --from=amneziawg-builder /build/output/usr/bin/* /usr/bin/
 
-# Замена wg на awg через символические ссылки
-# Это необходимо, т.к. приложение вызывает команду 'wg', но она должна использовать
-# 'awg' (AmneziaWG), который понимает параметры обфускации (Jc, Jmin, Jmax, etc)
-RUN rm -f /usr/bin/wg && \
+# Замена wg на awg и wg-quick на awg-quick через символические ссылки
+# Это необходимо, т.к. приложение вызывает команды 'wg' и 'wg-quick', но они должны использовать
+# 'awg' и 'awg-quick' (AmneziaWG), которые понимают параметры обфускации (Jc, Jmin, Jmax, etc)
+RUN if [ ! -f /usr/bin/awg-quick ]; then \
+        sed 's/type wireguard/type amneziawg/g' /usr/bin/wg-quick > /usr/bin/awg-quick && \
+        chmod +x /usr/bin/awg-quick; \
+    fi && \
+    rm -f /usr/bin/wg /usr/bin/wg-quick && \
     ln -s /usr/bin/awg /usr/bin/wg && \
-    ln -s /usr/bin/awg /usr/local/bin/wg
+    ln -s /usr/bin/awg /usr/local/bin/wg && \
+    ln -s /usr/bin/awg-quick /usr/bin/wg-quick && \
+    ln -s /usr/bin/awg-quick /usr/local/bin/wg-quick
 
 # Копирование Node.js приложения из builder stage
 COPY --from=builder /build/node_modules /app/node_modules
