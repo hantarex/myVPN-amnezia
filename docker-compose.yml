@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-
+    privileged: true
     # Имя образа после сборки
     image: amneziawg-vpn:local
 

@@ -75,6 +75,13 @@ RUN apk add --no-cache \
 # Копирование AmneziaWG tools из builder stage
 COPY --from=amneziawg-builder /build/output/usr/bin/* /usr/bin/
 
+# Замена wg на awg через символические ссылки
+# Это необходимо, т.к. приложение вызывает команду 'wg', но она должна использовать
+# 'awg' (AmneziaWG), который понимает параметры обфускации (Jc, Jmin, Jmax, etc)
+RUN rm -f /usr/bin/wg && \
+    ln -s /usr/bin/awg /usr/bin/wg && \
+    ln -s /usr/bin/awg /usr/local/bin/wg
+
 # Копирование Node.js приложения из builder stage
 COPY --from=builder /build/node_modules /app/node_modules
 COPY --from=builder /build /app
