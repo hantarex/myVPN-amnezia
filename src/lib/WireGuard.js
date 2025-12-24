@@ -18,6 +18,7 @@ const {
   WG_MTU,
   WG_DEFAULT_DNS,
   WG_DEFAULT_ADDRESS,
+  WG_DEFAULT_ADDRESS_IPV6,
   WG_PERSISTENT_KEEPALIVE,
   WG_ALLOWED_IPS,
   WG_PRE_UP,
@@ -57,12 +58,14 @@ module.exports = class WireGuard {
           log: 'echo ***hidden*** | wg pubkey',
         });
         const address = WG_DEFAULT_ADDRESS.replace('x', '1');
+        const addressIPv6 = WG_DEFAULT_ADDRESS_IPV6.replace('x', '1');
 
         config = {
           server: {
             privateKey,
             publicKey,
             address,
+            addressIPv6,
             jc: JC,
             jmin: JMIN,
             jmax: JMAX,
@@ -121,7 +124,7 @@ module.exports = class WireGuard {
 # Server
 [Interface]
 PrivateKey = ${config.server.privateKey}
-Address = ${config.server.address}/24
+Address = ${config.server.address}/24, ${config.server.addressIPv6}/64
 ListenPort = ${WG_PORT}
 PreUp = ${WG_PRE_UP}
 PostUp = ${WG_POST_UP}
@@ -138,7 +141,7 @@ PostDown = ${WG_POST_DOWN}
 [Peer]
 PublicKey = ${client.publicKey}
 ${client.preSharedKey ? `PresharedKey = ${client.preSharedKey}\n` : ''
-}AllowedIPs = ${client.address}/32`;
+}AllowedIPs = ${client.address}/32, ${client.addressIPv6}/128`;
     }
 
     debug('Config saving...');
@@ -233,7 +236,7 @@ ${client.preSharedKey ? `PresharedKey = ${client.preSharedKey}\n` : ''
     return `
 [Interface]
 PrivateKey = ${client.privateKey ? `${client.privateKey}` : 'REPLACE_ME'}
-Address = ${client.address}/24
+Address = ${client.address}/24, ${client.addressIPv6}/64
 ${WG_DEFAULT_DNS ? `DNS = ${WG_DEFAULT_DNS}\n` : ''}\
 ${WG_MTU ? `MTU = ${WG_MTU}\n` : ''}\
 
@@ -267,7 +270,7 @@ Endpoint = ${WG_HOST}:${WG_CONFIG_PORT}`;
     const preSharedKey = await Util.exec('wg genpsk');
 
     // Calculate next IP
-    let address;
+    let address, addressIPv6;
     for (let i = 2; i < 255; i++) {
       const client = Object.values(config.clients).find((client) => {
         return client.address === WG_DEFAULT_ADDRESS.replace('x', i);
@@ -275,6 +278,7 @@ Endpoint = ${WG_HOST}:${WG_CONFIG_PORT}`;
 
       if (!client) {
         address = WG_DEFAULT_ADDRESS.replace('x', i);
+        addressIPv6 = WG_DEFAULT_ADDRESS_IPV6.replace('x', i);
         break;
       }
     }
@@ -288,6 +292,7 @@ Endpoint = ${WG_HOST}:${WG_CONFIG_PORT}`;
       id,
       name,
       address,
+      addressIPv6,
       privateKey,
       publicKey,
       preSharedKey,
@@ -363,14 +368,21 @@ Endpoint = ${WG_HOST}:${WG_CONFIG_PORT}`;
     await this.saveConfig();
   }
 
-  async updateClientAddress({ clientId, address }) {
+  async updateClientAddress({ clientId, address, addressIPv6 }) {
     const client = await this.getClient({ clientId });
 
     if (!Util.isValidIPv4(address)) {
-      throw new ServerError(`Invalid Address: ${address}`, 400);
+      throw new ServerError(`Invalid IPv4 Address: ${address}`, 400);
+    }
+
+    if (addressIPv6 && !Util.isValidIPv6(addressIPv6)) {
+      throw new ServerError(`Invalid IPv6 Address: ${addressIPv6}`, 400);
     }
 
     client.address = address;
+    if (addressIPv6) {
+      client.addressIPv6 = addressIPv6;
+    }
     client.updatedAt = new Date();
 
     await this.saveConfig();
