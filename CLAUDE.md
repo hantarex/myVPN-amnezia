@@ -78,7 +78,8 @@ docker compose exec amnezia-wg-easy sh
 ### Сеть
 - UDP порт 51820 - VPN трафик
 - TCP порт 51821 - Web UI
-- Внутренняя сеть: 10.8.0.0/24
+- Внутренняя сеть IPv4: 10.8.0.0/24
+- Внутренняя сеть IPv6: fd42:42:42::/64 (опционально)
 
 ### Хранилище
 - `./data` → `/etc/wireguard` - конфигурации WireGuard
@@ -88,3 +89,4 @@ docker compose exec amnezia-wg-easy sh
 - Docker Compose v2.0+
 - Linux Kernel 5.6+ (для WireGuard)
 - Открытые порты: 51820/UDP, 51821/TCP
+- IPv6 поддержка в ядре (опционально, для IPv6 VPN)
