@@ -58,7 +58,7 @@ module.exports = class WireGuard {
           log: 'echo ***hidden*** | wg pubkey',
         });
         const address = WG_DEFAULT_ADDRESS.replace('x', '1');
-        const addressIPv6 = WG_DEFAULT_ADDRESS_IPV6.replace('x', '1');
+        const addressIPv6 = WG_DEFAULT_ADDRESS_IPV6.replace('x', '1').split('/')[0];
 
         config = {
           server: {
@@ -124,8 +124,7 @@ module.exports = class WireGuard {
 # Server
 [Interface]
 PrivateKey = ${config.server.privateKey}
-Address = ${config.server.address}/24
-Address = ${config.server.addressIPv6}/64
+Address = ${config.server.address}/24, ${config.server.addressIPv6}/64
 ListenPort = ${WG_PORT}
 PreUp = ${WG_PRE_UP}
 PostUp = ${WG_POST_UP}
@@ -237,8 +236,7 @@ ${client.preSharedKey ? `PresharedKey = ${client.preSharedKey}\n` : ''
     return `
 [Interface]
 PrivateKey = ${client.privateKey ? `${client.privateKey}` : 'REPLACE_ME'}
-Address = ${client.address}/24
-Address = ${client.addressIPv6}/64
+Address = ${client.address}/32, ${client.addressIPv6}/128
 ${WG_DEFAULT_DNS ? `DNS = ${WG_DEFAULT_DNS}\n` : ''}\
 ${WG_MTU ? `MTU = ${WG_MTU}\n` : ''}\
 
@@ -280,7 +278,7 @@ Endpoint = ${WG_HOST}:${WG_CONFIG_PORT}`;
 
       if (!client) {
         address = WG_DEFAULT_ADDRESS.replace('x', i);
-        addressIPv6 = WG_DEFAULT_ADDRESS_IPV6.replace('x', i);
+        addressIPv6 = WG_DEFAULT_ADDRESS_IPV6.replace('x', i).split('/')[0];
         break;
       }
     }
