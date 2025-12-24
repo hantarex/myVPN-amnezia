@@ -5,6 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile
     privileged: true
+    network_mode: host
     # Имя образа после сборки
     image: amneziawg-vpn:local
 
@@ -31,19 +32,19 @@ services:
     volumes:
       - ./data:/etc/wireguard
 
-    ports:
-      - "${WG_PORT:-51820}:${WG_PORT:-51820}/udp"
-      - "${WEB_PORT:-51821}:${WEB_PORT:-51821}/tcp"
+#    ports:
+#      - "${WG_PORT:-51820}:${WG_PORT:-51820}/udp"
+#      - "${WEB_PORT:-51821}:${WEB_PORT:-51821}/tcp"
 
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
       - NET_RAW
 
-    sysctls:
-      - net.ipv4.conf.all.src_valid_mark=1
-      - net.ipv4.ip_forward=1
-      - net.ipv6.conf.all.forwarding=1
+#    sysctls:
+#      - net.ipv4.conf.all.src_valid_mark=1
+#      - net.ipv4.ip_forward=1
+#      - net.ipv6.conf.all.forwarding=1
 
     devices:
       - /dev/net/tun:/dev/net/tun
